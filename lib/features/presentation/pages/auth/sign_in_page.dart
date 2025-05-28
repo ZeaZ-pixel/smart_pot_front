@@ -105,7 +105,7 @@ class SignInPage extends HookWidget {
                     },
                   ),
                   SizedBox(
-                    height: 40,
+                    height: 25,
                   ),
                   ElevatedButton(
                     onPressed: () {
