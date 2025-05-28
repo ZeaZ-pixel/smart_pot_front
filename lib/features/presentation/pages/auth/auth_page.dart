@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:smart_pot_front/config/assets/app_images.dart';
+import 'package:smart_pot_front/config/routes/app_routes.dart';
 import 'package:smart_pot_front/config/themes/app_colors.dart';
 
 class AuthPage extends StatelessWidget {
@@ -45,14 +47,18 @@ class AuthPage extends StatelessWidget {
               height: 40,
             ),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                context.go(AppRoutes.authSignIn);
+              },
               child: Text('Логин'),
             ),
             SizedBox(
               height: 16,
             ),
             OutlinedButton(
-              onPressed: () {},
+              onPressed: () {
+                context.go(AppRoutes.authSignUp);
+              },
               child: Text('Регситрация'),
             ),
           ],
