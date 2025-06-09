@@ -113,10 +113,10 @@ class SignInPage extends HookWidget {
                       if (!isValid) return;
                     },
                     child: Text('Авторизироваться'),
-                  )
+                  ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
