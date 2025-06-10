@@ -24,62 +24,59 @@ class EmailVerificationPage extends HookWidget {
       return null;
     }, []);
 
-    return BlocProvider(
-      create: (_) => sl<EmailVerificationBloc>(),
-      child: Scaffold(
-        appBar: AppBar(title: Text('Подтверждение Email')),
-        body: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: BlocConsumer<EmailVerificationBloc, EmailVerificationState>(
-            listener: (context, state) {
-              if (state is VerificationSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Регистрация успешна')),
-                );
-                context.go(AppRoutes.home);
-              } else if (state is VerificationFailure) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.error)),
-                );
-              }
-            },
-            builder: (context, state) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text('Код отправлен на $email'),
-                  SizedBox(height: 24),
-                  PinCodeTextField(
-                    appContext: context,
-                    controller: codeController,
-                    length: 6,
-                    onChanged: (_) {},
-                    onCompleted: (code) {
-                      context.read<EmailVerificationBloc>().add(
-                            VerifyCode(email: email, code: code),
-                          );
-                    },
-                    autoFocus: true,
-                    keyboardType: TextInputType.number,
-                  ),
-                  SizedBox(height: 24),
-                  if (state is VerificationLoading) CircularProgressIndicator(),
-                  if (state is VerificationFailure)
-                    Text(state.error, style: TextStyle(color: Colors.red)),
-                  if (state is CodeSent)
-                    state.canResend
-                        ? TextButton(
-                            onPressed: () => context
-                                .read<EmailVerificationBloc>()
-                                .add(ResendCodeRequested(email)),
-                            child: Text('Отправить код повторно'),
-                          )
-                        : Text(
-                            'Отправить повторно можно через ${state.secondsRemaining} сек'),
-                ],
+    return Scaffold(
+      appBar: AppBar(title: Text('Подтверждение Email')),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: BlocConsumer<EmailVerificationBloc, EmailVerificationState>(
+          listener: (context, state) {
+            if (state is VerificationSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Регистрация успешна')),
               );
-            },
-          ),
+              context.go(AppRoutes.home);
+            } else if (state is VerificationFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.error)),
+              );
+            }
+          },
+          builder: (context, state) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text('Код отправлен на $email'),
+                SizedBox(height: 24),
+                PinCodeTextField(
+                  appContext: context,
+                  controller: codeController,
+                  length: 6,
+                  onChanged: (_) {},
+                  onCompleted: (code) {
+                    context.read<EmailVerificationBloc>().add(
+                          VerifyCode(email: email, code: code),
+                        );
+                  },
+                  autoFocus: true,
+                  keyboardType: TextInputType.number,
+                ),
+                SizedBox(height: 24),
+                if (state is VerificationLoading) CircularProgressIndicator(),
+                if (state is VerificationFailure)
+                  Text(state.error, style: TextStyle(color: Colors.red)),
+                if (state is CodeSent)
+                  state.canResend
+                      ? TextButton(
+                          onPressed: () => context
+                              .read<EmailVerificationBloc>()
+                              .add(ResendCodeRequested(email)),
+                          child: Text('Отправить код повторно'),
+                        )
+                      : Text(
+                          'Отправить повторно можно через ${state.secondsRemaining} сек'),
+              ],
+            );
+          },
         ),
       ),
     );

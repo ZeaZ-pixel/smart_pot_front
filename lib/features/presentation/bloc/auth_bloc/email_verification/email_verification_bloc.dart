@@ -1,17 +1,21 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_pot_front/features/domain/repositories/verification_repository.dart';
+import 'package:smart_pot_front/features/domain/usecase/save_auth_tokens.dart';
 import 'email_verification_event.dart';
 import 'email_verification_state.dart';
 
 class EmailVerificationBloc
     extends Bloc<EmailVerificationEvent, EmailVerificationState> {
   final VerificationRepository repository;
+  final SaveAuthTokens saveAuthTokens;
+
   Timer? _resendTimer;
   int _secondsRemaining = 60;
   late Emitter _emit;
 
-  EmailVerificationBloc(this.repository) : super(VerificationInitial()) {
+  EmailVerificationBloc(this.repository, this.saveAuthTokens)
+      : super(VerificationInitial()) {
     on<SendVerificationCode>(_onSendCode);
     on<ResendCodeRequested>(_onResendCode);
     on<VerifyCode>(_onVerifyCode);
@@ -41,7 +45,11 @@ class EmailVerificationBloc
   Future<void> _onVerifyCode(VerifyCode event, Emitter emit) async {
     emit(VerificationLoading());
     try {
-      await repository.verifyCode(email: event.email, code: event.code);
+      final tokens =
+          await repository.verifyCode(email: event.email, code: event.code);
+      await saveAuthTokens(
+          accessToken: tokens.accessToken, refreshToken: tokens.refreshToken);
+
       emit(VerificationSuccess());
     } catch (e) {
       emit(VerificationFailure(e.toString()));
