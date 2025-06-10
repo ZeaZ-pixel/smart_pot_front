@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_pot_front/config/assets/app_images.dart';
 import 'package:smart_pot_front/config/routes/app_routes.dart';
 import 'package:smart_pot_front/config/themes/app_colors.dart';
 import 'package:smart_pot_front/core/widgets/custom_form_input.dart';
+import 'package:smart_pot_front/core/widgets/custom_loader.dart';
+import 'package:smart_pot_front/features/presentation/bloc/auth_bloc/sign_in/sign_in_bloc.dart';
+import 'package:smart_pot_front/features/presentation/bloc/auth_bloc/sign_in/sign_in_event.dart';
+import 'package:smart_pot_front/features/presentation/bloc/auth_bloc/sign_in/sign_in_state.dart';
 
 class SignInPage extends HookWidget {
   const SignInPage({super.key});
@@ -12,6 +17,8 @@ class SignInPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final formKey = useMemoized(() => GlobalKey<FormState>(), []);
+    final usernameOrEmailController = useTextEditingController();
+    final passwordController = useTextEditingController();
 
     return Scaffold(
       body: Container(
@@ -53,7 +60,7 @@ class SignInPage extends HookWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    context.go(AppRoutes.authSignUp);
+                    context.go(AppRoutes.authSignIn);
                   },
                   child: Text(
                     'Зарегистрироваться',
@@ -76,6 +83,7 @@ class SignInPage extends HookWidget {
                 children: [
                   CustomFormInput(
                     label: 'Username/Email',
+                    controller: usernameOrEmailController,
                     placeholder: 'ВВедите email или username',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -94,6 +102,7 @@ class SignInPage extends HookWidget {
                     label: 'Пароль',
                     placeholder: 'Пароль',
                     isPassword: true,
+                    controller: passwordController,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Введите пароль';
@@ -107,12 +116,39 @@ class SignInPage extends HookWidget {
                   SizedBox(
                     height: 25,
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      final isValid = formKey.currentState?.validate() ?? false;
-                      if (!isValid) return;
+                  BlocConsumer<SignInBloc, SignInState>(
+                    listener: (context, state) {
+                      if (state is SignInSuccess) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Авторизация успешна')),
+                        );
+                        context.go(AppRoutes.home);
+                      } else if (state is SignInFailure) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(state.error)),
+                        );
+                      }
                     },
-                    child: Text('Авторизироваться'),
+                    builder: (context, state) => ElevatedButton(
+                      onPressed: state is SignInLoading
+                          ? null
+                          : () {
+                              final isValid =
+                                  formKey.currentState?.validate() ?? false;
+                              if (!isValid) return;
+
+                              context.read<SignInBloc>().add(
+                                    SignInSubmitted(
+                                      usernameOrEmail:
+                                          usernameOrEmailController.text.trim(),
+                                      password: passwordController.text.trim(),
+                                    ),
+                                  );
+                            },
+                      child: state is SignInLoading
+                          ? CustomLoader()
+                          : Text('Авторизация'),
+                    ),
                   ),
                 ],
               ),

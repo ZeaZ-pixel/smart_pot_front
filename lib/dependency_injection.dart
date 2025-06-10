@@ -17,34 +17,24 @@ import 'package:smart_pot_front/features/presentation/bloc/auth_bloc/sign_up/sig
 final sl = GetIt.instance;
 
 Future<void> initializeDependencies() async {
+  // Core
   sl.registerLazySingleton(() => Dio());
-
-  sl.registerFactory(() => SignUpBloc(sl()));
-  sl.registerLazySingleton(() => RegisterUser(sl()));
-  sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
-
-  sl.registerLazySingleton<VerificationRepository>(
-    () => VerificationRepositoryImpl(sl()),
-  );
-  sl.registerFactory(
-    () => EmailVerificationBloc(
-      sl<VerificationRepository>(),
-      sl<SaveAuthTokens>(),
-    ),
-  );
-
-  sl.registerFactory(
-    () => SignInBloc(
-      sl<LoginUser>(),
-      sl<SaveAuthTokens>(),
-    ),
-  );
-
   sl.registerLazySingleton(() => TokenStorageService());
 
+  // Data
   sl.registerLazySingleton<AuthTokenRepository>(
-    () => AuthTokenRepositoryImpl(sl()),
-  );
+      () => AuthTokenRepositoryImpl(sl()));
+  sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
+  sl.registerLazySingleton<VerificationRepository>(
+      () => VerificationRepositoryImpl(sl()));
 
+  // Use Cases
   sl.registerLazySingleton(() => SaveAuthTokens(sl()));
+  sl.registerLazySingleton(() => RegisterUser(sl()));
+  sl.registerLazySingleton(() => LoginUser(sl()));
+
+  // Blocs
+  sl.registerFactory(() => SignUpBloc(sl()));
+  sl.registerFactory(() => SignInBloc(sl(), sl()));
+  sl.registerFactory(() => EmailVerificationBloc(sl(), sl()));
 }

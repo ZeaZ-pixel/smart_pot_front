@@ -47,7 +47,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       final response = await dio.post(
-        ApiConstants.register,
+        ApiConstants.login,
         data: {
           'usernameOrEmail': usernameOrEmail,
           'password': password,
@@ -58,8 +58,8 @@ class AuthRepositoryImpl implements AuthRepository {
       if (response.statusCode != 201) {
         throw Exception(response.data['message'] ?? 'Ошибка регистрации');
       }
-      final accessToken = response.data['access_token'];
-      final refreshToken = response.data['refresh_token'];
+      final accessToken = response.data['accessToken'];
+      final refreshToken = response.data['refreshToken'];
       if (accessToken != null && refreshToken != null) {
         return TokensPair(
           accessToken: accessToken,

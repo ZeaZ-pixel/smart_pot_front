@@ -9,6 +9,7 @@ import 'package:smart_pot_front/features/presentation/bloc/auth_bloc/sign_up/sig
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   await di.initializeDependencies();
 

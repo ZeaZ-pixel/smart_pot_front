@@ -26,8 +26,10 @@ class VerificationRepositoryImpl implements VerificationRepository {
         'code': code,
       });
 
-      final accessToken = response.data['access_token'];
-      final refreshToken = response.data['refresh_token'];
+      final accessToken = response.data['accessToken'];
+      final refreshToken = response.data['refreshToken'];
+
+      print(accessToken);
 
       if (accessToken != null && refreshToken != null) {
         return TokensPair(
